@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoC 7th / SF TRPG 핸드아웃 메이커</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Nanum+Myeongjo:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;500;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0; padding: 25px 20px;
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f0f2f5; color: #333;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+    }
+
+    /* 상단 컨트롤 바 */
+    .control-bar {
+      width: 100%; max-width: 1100px;
+      background-color: #fff; padding: 16px 20px;
+      border-radius: 12px; border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+    }
+
+    .control-group { display: flex; align-items: center; gap: 8px; }
+    .control-group label { font-size: 0.88rem; font-weight: 600; color: #475569; }
+
+    select, input[type="file"], input[type="number"], input[type="color"] {
+      padding: 7px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #f8fafc;
+      font-family: inherit; font-size: 0.88rem; color: #0f172a;
+    }
+
+    /* 버튼 스타일 */
+    .btn {
+      padding: 7px 12px; background-color: #f1f5f9; border: 1px solid #cbd5e1;
+      border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: #334155; transition: all 0.2s;
+    }
+    .btn:hover { background-color: #e2e8f0; }
+    .btn.active { background-color: #2563eb; color: #fff; border-color: #2563eb; }
+
+    .file-upload-label {
+      padding: 7px 12px; background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1;
+      border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-weight: 600;
+    }
+    .file-upload-label:hover { background-color: #bae6fd; }
+    input[type="file"] { display: none; }
+
+    .btn-add-text { background-color: #10b981; color: #fff; border-color: #10b981; }
+    .btn-add-text:hover { background-color: #059669; }
+
+    .btn-download {
+      padding: 9px 18px; background-color: #1e293b; color: #fff;
+      border: none; border-radius: 6px; font-weight: 700; cursor: pointer;
+      margin-left: auto; transition: background 0.2s; shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .btn-download:hover { background-color: #0f172a; }
+
+    /* 작업대 영역 */
+    .work-stage {
+      width: 100%; max-width: 1100px;
+      padding: 40px; background-color: #cbd5e1;
+      border-radius: 12px; border: 1px solid #94a3b8;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 650px; position: relative; overflow: hidden;
+    }
+
+    /* 핸드아웃 카드 */
+    .handout-card {
+      width: 420px; min-height: 550px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      position: relative; overflow: hidden;
+      background-size: 100% 100%; background-repeat: no-repeat;
+    }
+
+    /* 이동 및 편집 가능한 텍스트 상자 */
+    .draggable-text {
+      position: absolute; cursor: move;
+      padding: 6px 10px; border: 1px dashed transparent;
+      outline: none; white-space: pre-wrap; word-break: break-all;
+      min-width: 50px; min-height: 24px;
+    }
+    .draggable-text:hover { border-color: rgba(0,0,0,0.3); }
+    .draggable-text.selected { border-color: #2563eb; background-color: rgba(37, 99, 235, 0.05); }
+
+    /* --- 테마 스타일 --- */
+    .handout-card.theme-img1 {
+      background-image: url('pngwing.com.png');
+      color: #2b1d0c; font-family: 'Nanum Myeongjo', serif;
+    }
+
+    .handout-card.theme-img2 {
+      background-image: url('pngwing.com (1).png');
+      color: #3d2b1f; font-family: 'Nanum Myeongjo', serif;
+    }
+
+    .handout-card.theme-img3 {
+      background-image: url('49dba705-c254-47f7-bef0-872f8f85c22c.png');
+      color: #2b1d0c; font-family: 'Nanum Myeongjo', serif;
+    }
+
+    .handout-card.theme-img4 {
+      background-image: url('569983ae-446c-49a4-8ffd-c9386f4c66b8.png');
+      color: #2b1d0c; font-family: 'Nanum Myeongjo', serif;
+    }
+
+    .handout-card.theme-sf {
+      background: radial-gradient(circle at center, #001529 0%, #000814 100%);
+      color: #00f2fe; font-family: 'Orbitron', sans-serif;
+      border: 2px solid #00f2fe;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.5), inset 0 0 30px rgba(0, 242, 254, 0.2);
+    }
+    .handout-card.theme-sf .draggable-text {
+      text-shadow: 0 0 8px rgba(0, 242, 254, 0.8);
+    }
+
+    .help-text {
+      position: absolute; bottom: 12px; left: 12px;
+      font-size: 0.8rem; color: #475569; background: rgba(255,255,255,0.9);
+      padding: 6px 12px; border-radius: 6px; pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="control-bar">
+    <div class="control-group">
+      <label for="theme-select">테마 선택:</label>
+      <select id="theme-select">
+        <option value="theme-img1">📜 테마 1 (pngwing.com)</option>
+        <option value="theme-img2">📜 테마 2 (pngwing.com (1))</option>
+        <option value="theme-img3">📜 테마 3 (49dba7...)</option>
+        <option value="theme-img4">📜 테마 4 (569983...)</option>
+        <option value="theme-sf">🚀 SF 네온 테마</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="font-file" class="file-upload-label">➕ 폰트 업로드</label>
+      <input type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2">
+      <select id="font-select">
+        <option value="default">기본 폰트</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="bg-file" class="file-upload-label">🖼️ 커스텀 배경</label>
+      <input type="file" id="bg-file" accept="image/*">
+    </div>
+
+    <div class="control-group">
+      <button class="btn" id="btn-bold"><b>B</b></button>
+      <button class="btn" id="btn-italic"><i>I</i></button>
+      <input type="number" id="font-size-input" value="16" min="8" max="100" style="width: 60px;">
+      <input type="color" id="font-color-input" value="#2b1d0c">
+    </div>
+
+    <button class="btn btn-add-text" id="btn-add-text">➕ 텍스트 상자 추가</button>
+
+    <button class="btn-download" id="btn-download">💾 PNG 저장하기</button>
+  </div>
+
+  <div class="work-stage">
+    <div id="handout-card" class="handout-card theme-img1">
+      <div class="draggable-text" contenteditable="true" style="top: 10%; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: bold;">
+        미스카토닉 대학 도서관 기록
+      </div>
+      <div class="draggable-text" contenteditable="true" style="top: 25%; left: 8%; width: 84%; font-size: 15px; line-height: 1.6;">
+1920년 8월 14일...
+금서 구역 깊은 곳에서 발견된 봉인된 일기장.
+
+페이지 곳곳에 알 수 없는 얼룩과 핏자국이 남아있다.
+
+"그 이름을 입에 담지 말라. 별들이 제자리를 찾을 때, 그것이 다시 일어날지니..."
+      </div>
+    </div>
+    <div class="help-text">💡 글상자 클릭: 선택/수정 | 드래그: 이동 | 선택 후 Delete키: 삭제</div>
+  </div>
+
+  <script>
+    // DOM 요소
+    const themeSelect = document.getElementById('theme-select');
+    const bgFileInput = document.getElementById('bg-file');
+    const fontFileInput = document.getElementById('font-file');
+    const fontSelect = document.getElementById('font-select');
+    const handoutCard = document.getElementById('handout-card');
+    const btnDownload = document.getElementById('btn-download');
+
+    const btnBold = document.getElementById('btn-bold');
+    const btnItalic = document.getElementById('btn-italic');
+    const fontSizeInput = document.getElementById('font-size-input');
+    const fontColorInput = document.getElementById('font-color-input');
+    const btnAddText = document.getElementById('btn-add-text');
+
+    let selectedTextNode = null; // 현재 선택된 텍스트 상자
+
+    // --- 텍스트 상자 생성 및 이벤트 바인딩 ---
+    function initDraggableText(element) {
+      // 클릭 시 선택 상태 지정 및 서식 컨트롤 값 연동
+      element.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectTextNode(element);
+      });
+
+      // 드래그 앤 드롭 이동 구현
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      element.addEventListener('mousedown', (e) => {
+        // 편집 중일 때 클릭만 한 경우는 드래그 제외
+        if (document.activeElement === element) return;
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = element.offsetLeft;
+        initialTop = element.offsetTop;
+
+        element.style.transform = 'none'; // 중앙정렬 해제
+
+        const onMouseMove = (moveEvent) => {
+          if (!isDragging) return;
+          const dx = moveEvent.clientX - startX;
+          const dy = moveEvent.clientY - startY;
+          element.style.left = `${initialLeft + dx}px`;
+          element.style.top = `${initialTop + dy}px`;
+        };
+
+        const onMouseUp = () => {
+          isDragging = false;
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+    }
+
+    // 초기 존재하는 텍스트 상자 바인딩
+    document.querySelectorAll('.draggable-text').forEach(initDraggableText);
+
+    // 텍스트 선택 함수
+    function selectTextNode(node) {
+      if (selectedTextNode) {
+        selectedTextNode.classList.remove('selected');
+      }
+      selectedTextNode = node;
+      selectedTextNode.classList.add('selected');
+
+      // 선택된 글자의 서식 정보를 상단 컨트롤에 반영
+      btnBold.classList.toggle('active', selectedTextNode.style.fontWeight === 'bold');
+      btnItalic.classList.toggle('active', selectedTextNode.style.fontStyle === 'italic');
+      
+      const currentSize = parseInt(window.getComputedStyle(selectedTextNode).fontSize);
+      fontSizeInput.value = currentSize || 16;
+      
+      const currentColor = selectedTextNode.style.color;
+      if (currentColor) fontColorInput.value = rgbToHex(currentColor);
+    }
+
+    // 작업대 바탕 클릭 시 선택 해제
+    document.addEventListener('click', () => {
+      if (selectedTextNode) {
+        selectedTextNode.classList.remove('selected');
+        selectedTextNode = null;
+      }
+    });
+
+    // --- 서식 컨트롤 이벤트 ---
+    btnBold.addEventListener('click', () => {
+      if (!selectedTextNode) return;
+      const isBold = selectedTextNode.style.fontWeight === 'bold';
+      selectedTextNode.style.fontWeight = isBold ? 'normal' : 'bold';
+      btnBold.classList.toggle('active', !isBold);
+    });
+
+    btnItalic.addEventListener('click', () => {
+      if (!selectedTextNode) return;
+      const isItalic = selectedTextNode.style.fontStyle === 'italic';
+      selectedTextNode.style.fontStyle = isItalic ? 'normal' : 'italic';
+      btnItalic.classList.toggle('active', !isItalic);
+    });
+
+    fontSizeInput.addEventListener('input', () => {
+      if (!selectedTextNode) return;
+      selectedTextNode.style.fontSize = `${fontSizeInput.value}px`;
+    });
+
+    fontColorInput.addEventListener('input', () => {
+      if (!selectedTextNode) return;
+      selectedTextNode.style.color = fontColorInput.value;
+    });
+
+    // 텍스트 상자 추가
+    btnAddText.addEventListener('click', () => {
+      const newText = document.createElement('div');
+      newText.className = 'draggable-text';
+      newText.contentEditable = 'true';
+      newText.textContent = '새로운 텍스트 상자';
+      newText.style.top = '40%';
+      newText.style.left = '30%';
+      newText.style.fontSize = '16px';
+
+      handoutCard.appendChild(newText);
+      initDraggableText(newText);
+      selectTextNode(newText);
+    });
+
+    // Delete키로 선택된 텍스트 삭제
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Delete' && selectedTextNode && document.activeElement !== selectedTextNode) {
+        selectedTextNode.remove();
+        selectedTextNode = null;
+      }
+    });
+
+    // --- 다중 폰트 업로드 관리 ---
+    fontFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const fontName = 'CustomFont_' + Date.now();
+        const newFont = new FontFace(fontName, evt.target.result);
+
+        newFont.load().then(function(loadedFont) {
+          document.fonts.add(loadedFont);
+          
+          const option = document.createElement('option');
+          option.value = fontName;
+          option.textContent = `🔤 ${file.name}`;
+          fontSelect.appendChild(option);
+          fontSelect.value = fontName;
+
+          applyFont(fontName);
+        }).catch(err => {
+          alert('폰트를 불러오지 못했습니다.');
+          console.error(err);
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // 폰트 선택 변경 시
+    fontSelect.addEventListener('change', () => {
+      applyFont(fontSelect.value);
+    });
+
+    function applyFont(fontName) {
+      const targetFont = fontName === 'default' ? '' : `"${fontName}", sans-serif`;
+      if (selectedTextNode) {
+        selectedTextNode.style.fontFamily = targetFont;
+      } else {
+        handoutCard.style.fontFamily = targetFont;
+      }
+    }
+
+    // --- 배경 이미지 업로드 ---
+    bgFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        handoutCard.style.backgroundImage = `url('${evt.target.result}')`;
+        handoutCard.className = 'handout-card'; 
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 테마 전환
+    themeSelect.addEventListener('change', () => {
+      handoutCard.className = `handout-card ${themeSelect.value}`;
+      handoutCard.style.backgroundImage = '';
+    });
+
+    // RGB Color를 Hex로 변환해주는 헬퍼 함수
+    function rgbToHex(rgb) {
+      if (!rgb || !rgb.startsWith('rgb')) return '#2b1d0c';
+      const res = rgb.match(/\d+/g);
+      return res ? "#" + res.slice(0, 3).map(x => (+x).toString(16).padStart(2, '0')).join('') : '#2b1d0c';
+    }
+
+    // --- PNG 다운로드 (html2canvas) ---
+    btnDownload.addEventListener('click', async () => {
+      if (selectedTextNode) {
+        selectedTextNode.classList.remove('selected');
+        selectedTextNode = null;
+      }
+
+      try {
+        const canvas = await html2canvas(handoutCard, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `TRPG_Handout_${Date.now()}.png`;
+        link.click();
+      } catch (error) {
+        alert('PNG 이미지 생성에 실패했습니다.');
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
